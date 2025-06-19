@@ -1,7 +1,7 @@
 <template lang="pug">
   h1 LA/DX Menu Router
   .buttons
-    button(@click="showAllInv=!showAllInv") {{showAllInv ? 'Hide Inventory' : 'Show Inventory'}}
+    button(@click="showAllInv=!showAllInv") {{showAllInv ? 'Hide Equipped' : 'Show Equipped'}}
     button(@click="editingEnabled=!editingEnabled") {{editingEnabled ? 'Disable Editing' : 'Enable Editing'}}
     button(v-if="editingEnabled" @click="addOne") Add an Action
     button(v-if="editingEnabled" @click="mappingToClipboard") Export Mapping to Clipboard
@@ -15,15 +15,15 @@
   .action(v-for="(action, i) of actions" @click="select(i)")
     span {{labelFor(action)}}
     span(v-if="action.buttons") {{emojisFor(action.buttons)}}
-    .inv-grid(v-if="showAllInv")
-      .inv-item(v-for="(item, j) of states[i].inv.slice(0,12)" :class="{selected:states[i].position==j, 'top-of-inv':j<=1}")
-        span(v-if="j==0" style="margin-right:2px") B
-        span(v-if="j==1" style="margin-right:2px") A
+    .inv-grid(v-if="showAllInv && action.buttons")
+      .inv-item(v-for="(item, j) of states[i].inv.slice(0,2)" :class="{selected:states[i].position==j}")
+        span(v-if="j==0" style="margin-right:4px") B
+        span(v-if="j==1" style="margin-right:4px") A
         span(v-if="j>1" style="margin-right:6px")
         div(:style="spriteFor(item)")
   span(v-if="actions.length") Input count: {{inputCount}}
   .buttons
-    button(@click="showAllInv=!showAllInv") {{showAllInv ? 'Hide Inventory' : 'Show Inventory'}}
+    button(@click="showAllInv=!showAllInv") {{showAllInv ? 'Hide Equipped' : 'Show Equipped'}}
     button(@click="editingEnabled=!editingEnabled") {{editingEnabled ? 'Disable Editing' : 'Enable Editing'}}
     button(v-if="editingEnabled" @click="addOne") Add an Action
     button(v-if="editingEnabled" @click="mappingToClipboard") Export Mapping to Clipboard
@@ -118,7 +118,7 @@
     showModal.value = true
   }
 
-  const showAllInv = ref(false)
+  const showAllInv = ref(true)
   const editingEnabled = ref(false)
   const addOne = () => {
     let newIndex = showModal.value ? selected.value + 1 : actions.value.length
@@ -195,12 +195,9 @@
 
     let json = params.get('json')
     if (json)
-      fetch(json)
+      await fetch(json)
         .then(res => res.json())
         .then(data => {actions.value = data})
-
-    if (params.get('showInv'))
-      showAllInv.value = true
 
     if (params.get('edit') || !actions.value.length)
       editingEnabled.value = true
